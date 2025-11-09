@@ -12,7 +12,7 @@ export function AppProvider({ children }) {
   const [highlights, setHighlights] = useState([]);
   const [chatHistory, setChatHistory] = useState([]);
 
-  const BASE_URL = "https://jurimate-1-s6az.onrender.com/api";
+  const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8080/api";
 
   const analyze = async (inputText) => {
     const text = (inputText ?? rawText)?.toString().trim();
