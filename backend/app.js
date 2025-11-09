@@ -1,32 +1,21 @@
 import express from "express";
 import cors from "cors";
-import helmet from "helmet";
-import morgan from "morgan";
-import routes from "./routes.js";
-import { errorHandler, notFoundHandler } from "./middlewares/errorHandler.js";
+import dotenv from "dotenv";
+import routes from "./routes/routes.js"; 
+import { errorHandler } from "./middlewares/errorHandler.js";
 
-export function createServer() {
-  const app = express();
+dotenv.config();
 
-  app.use(helmet());
-  app.use(
-    cors({
-      origin: process.env.CLIENT_ORIGIN?.split(",") || "*",
-      credentials: true
-    })
-  );
-  app.use(express.json({ limit: "10mb" }));
-  app.use(express.urlencoded({ extended: true }));
+const app = express();
+app.use(cors());
+app.use(express.json({ limit: "10mb" }));
 
-  if (process.env.NODE_ENV !== "production") {
-    app.use(morgan("dev"));
-  }
+app.get("/", (req, res) => {
+  res.send("⚖️ JuriMate Backend is Live!");
+});
 
-  app.get("/", (req, res) => res.send("⚖️ JuriMate Backend is Live!"));
-  app.use("/api", routes);
+app.use("/api", routes);
 
-  app.use(notFoundHandler);
-  app.use(errorHandler);
+app.use(errorHandler);
 
-  return app;
-}
+export default app;
