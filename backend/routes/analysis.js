@@ -16,34 +16,27 @@ router.post("/", async (req, res) => {
     }
 
     const prompt = `
-You are an expert legal assistant. Analyze the following legal document text and provide a clear, easy-to-understand summary.
+You are JuriMate — a legal AI that analyzes documents and provides structured insights.
 
-Document Text:
+Read the following legal document and provide:
+1. A simplified summary (3-4 sentences in plain English)
+2. A risk score from 0 to 100 (0-40: Safe, 41-70: Needs Attention, 71-100: Risky)
+3. Key highlights/clauses that need attention
+
+Document:
 ${text}
 
-Your task:
-1. Summarize what this document is about (type of agreement, purpose, parties involved).
-2. Highlight the key legal points or clauses (e.g., payment terms, liability, termination, refund, confidentiality, jurisdiction).
-3. Identify potential risks or obligations for each party.
-4. Give your analysis in plain English (no legal jargon).
-5. End with a short overall verdict — e.g., “This agreement protects the company more than the client.”
+Return in this JSON format:
+{
+  "simplifiedText": "Brief summary of the document...",
+  "riskScore": 45,
+  "highlights": [
+    {"text": "Payment Terms", "reason": "Explanation of why this matters"},
+    {"text": "Termination Clause", "reason": "Explanation of why this matters"}
+  ]
+}
 
-Your response should be structured like this:
-
-**📄 Summary:**
-(Brief 3–4 line overview)
-
-**⚖️ Key Legal Points:**
-- Clause 1: ...
-- Clause 2: ...
-- Clause 3: ...
-
-**🚨 Risks & Obligations:**
-- Party A: ...
-- Party B: ...
-
-**🧾 Legal View:**
-(Short interpretation or opinion)
+Keep the tone friendly and reassuring.
 `;
 
     const geminiApiUrl =
@@ -54,11 +47,34 @@ Your response should be structured like this:
       contents: [{ parts: [{ text: prompt }] }],
     });
 
-    const summary =
+    const aiText =
       response.data.candidates?.[0]?.content?.parts?.[0]?.text ||
       "⚠️ No analysis available from Gemini.";
 
-    res.json({ summary });
+    // Try to parse JSON from AI response
+    let parsedData;
+    try {
+      // Remove markdown code blocks if present
+      const cleanText = aiText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+      parsedData = JSON.parse(cleanText);
+    } catch (parseErr) {
+      // Fallback if JSON parsing fails
+      parsedData = {
+        simplifiedText: aiText,
+        riskScore: 50,
+        highlights: [
+          { text: "General Review", reason: "Please review the document carefully" }
+        ]
+      };
+    }
+
+    res.json({ 
+      data: {
+        simplifiedText: parsedData.simplifiedText || aiText,
+        riskScore: parsedData.riskScore || 50,
+        highlights: parsedData.highlights || []
+      }
+    });
   } catch (err) {
     console.error("Analysis error:", err.message);
     res.status(500).json({
