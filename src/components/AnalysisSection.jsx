@@ -1,4 +1,5 @@
 import { useState } from "react";
+import axios from "axios";
 import { useApp } from "../context/AppContext";
 
 export default function AnalysisSection() {
@@ -18,6 +19,9 @@ export default function AnalysisSection() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  // ✅ Base URL using env (recommended)
+  const BASE_URL = "https://jurimate-1-s6az.onrender.com";
+
   const analyzeDocument = async () => {
     if (!documentFile && !rawText) {
       setError("Please upload or paste a document first.");
@@ -28,26 +32,22 @@ export default function AnalysisSection() {
     setLoading(true);
 
     try {
-      // Fetch backend URL (change if deployed)
-      const res = await fetch("http://localhost:8080/api/analyze", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          text: documentFile, // Your extracted text
+      // ✅ Correct Axios request
+      const res = await axios.post(
+        `${BASE_URL}/api/analyze`,
+        {
+          text: documentFile || rawText,
           jurisdiction: "India",
-          docType: "Contract", // optional
-        }),
-      });
+          docType: "Contract",
+        },
+        {
+          headers: { "Content-Type": "application/json" },
+        }
+      );
 
-      const data = await res.json();
+      const { simplifiedText, highlights, riskScore } = res.data.data;
 
-      if (!res.ok) {
-        throw new Error(data.error || "Failed to analyze");
-      }
-
-      const { simplifiedText, highlights, riskScore } = data.data;
-
-      // Calculate risk band
+      // Risk band calculation
       let band = "Safe";
       if (riskScore > 70) band = "Risky";
       else if (riskScore > 40) band = "Needs Attention";
@@ -63,13 +63,14 @@ export default function AnalysisSection() {
       setRiskScore(riskScore);
       setRiskBand(band);
     } catch (err) {
-      console.error(err);
-      setError(err.message);
+      console.error("Analysis error:", err);
+      setError(err.response?.data?.error || "Failed to analyze");
     } finally {
       setLoading(false);
     }
   };
 
+  // ✅ Dynamic color band styling
   const color =
     riskBand === "Safe"
       ? "bg-green-100 text-green-800 border-green-200"
@@ -138,7 +139,7 @@ export default function AnalysisSection() {
             </p>
           </div>
 
-          {/* Important Points */}
+          {/* Highlights */}
           <div className="lg:col-span-3 border rounded-2xl p-6 bg-white shadow-soft">
             <h3 className="font-semibold mb-3">Important points</h3>
             {loading ? (

@@ -23,7 +23,7 @@ export default function LiveChatSection() {
     setLoading(true);
 
     try {
-      const res = await axios.post("http://localhost:8080/api/chat", {
+      const res = await axios.post("https://jurimate-1-s6az.onrender.com/api/chat", {
         message: msg,
         document: documentFile || "", 
       });

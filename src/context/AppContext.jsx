@@ -1,4 +1,5 @@
 import { createContext, useContext, useMemo, useState } from "react";
+import axios from "axios";
 
 const AppContext = createContext(null);
 
@@ -11,28 +12,25 @@ export function AppProvider({ children }) {
   const [highlights, setHighlights] = useState([]);
   const [chatHistory, setChatHistory] = useState([]);
 
-  // 🔹 NEW: Connect to backend analysis API
+  const BASE_URL = "https://jurimate-1-s6az.onrender.com/api";
+
   const analyze = async (inputText) => {
     const text = (inputText ?? rawText)?.toString().trim();
     if (!text) return;
 
     try {
-      const res = await fetch("http://localhost:8080/api/analyze", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      const res = await axios.post(
+        `${BASE_URL}/analyze`,
+        {
           text,
           jurisdiction: "India",
           docType: "Contract",
-        }),
-      });
+        },
+        { headers: { "Content-Type": "application/json" } }
+      );
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to analyze");
+      const { simplifiedText, highlights, riskScore } = res.data.data;
 
-      const { simplifiedText, highlights, riskScore } = data.data;
-
-      // Map risk score → band
       let band = "Safe";
       if (riskScore > 70) band = "Risky";
       else if (riskScore > 40) band = "Needs Attention";
@@ -51,27 +49,25 @@ export function AppProvider({ children }) {
     }
   };
 
-  // 🔹 NEW: Chat via backend API
   const askChat = async (message) => {
     if (!message) return;
 
-    // Show user message instantly
     setChatHistory((h) => [...h, { role: "user", text: message }]);
 
     try {
-      const res = await fetch("http://localhost:8080/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      const res = await axios.post(
+        `${BASE_URL}/chat`,
+        {
           message,
           context: documentFile || rawText || "",
-        }),
-      });
+        },
+        { headers: { "Content-Type": "application/json" } }
+      );
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Chat failed");
-
-      setChatHistory((h) => [...h, { role: "assistant", text: data.reply }]);
+      setChatHistory((h) => [
+        ...h,
+        { role: "assistant", text: res.data.reply },
+      ]);
     } catch (err) {
       console.error("Chat error:", err);
       setChatHistory((h) => [
