@@ -80,7 +80,17 @@ export default function AnalysisSection() {
       console.error("Analysis error:", err);
       console.error("Error response:", err.response?.data);
       console.error("Error status:", err.response?.status);
-      const errorMsg = err.response?.data?.error || err.response?.data?.message || err.message || "Failed to analyze";
+      
+      let errorMsg = "Failed to analyze document";
+      
+      if (err.response?.data?.error) {
+        errorMsg = err.response.data.error;
+      } else if (err.response?.data?.message) {
+        errorMsg = err.response.data.message;
+      } else if (err.message) {
+        errorMsg = err.message;
+      }
+      
       setError(`Error: ${errorMsg}`);
     } finally {
       setLoading(false);

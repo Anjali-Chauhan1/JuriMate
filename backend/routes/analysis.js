@@ -32,7 +32,13 @@ async function getTextFromFile(file) {
 }
 
 async function getAIAnalysis(text) {
-  const url = `https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent?key=${process.env.GEMINI_API_KEY}`;
+  const apiKey = process.env.GEMINI_API_KEY;
+  
+  if (!apiKey) {
+    throw new Error("GEMINI_API_KEY is not configured");
+  }
+
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
   const prompt = `
 You are JuriMate — a friendly legal AI.
@@ -51,25 +57,30 @@ Document:
 ${text}
 `;
 
-  const res = await axios.post(url, {
-    contents: [{ parts: [{ text: prompt }] }],
-  });
-
-  const aiText =
-    res.data.candidates?.[0]?.content?.parts?.[0]?.text || "No analysis found";
-
-  const clean = aiText.replace(/```json/g, "").replace(/```/g, "").trim();
-
   try {
-    return JSON.parse(clean);
-  } catch {
-    return {
-      simplifiedText: aiText,
-      riskScore: 50,
-      highlights: [
-        { text: "General Review", reason: "Please review the document carefully" },
-      ],
-    };
+    const res = await axios.post(url, {
+      contents: [{ parts: [{ text: prompt }] }],
+    });
+
+    const aiText =
+      res.data.candidates?.[0]?.content?.parts?.[0]?.text || "No analysis found";
+
+    const clean = aiText.replace(/```json/g, "").replace(/```/g, "").trim();
+
+    try {
+      return JSON.parse(clean);
+    } catch {
+      return {
+        simplifiedText: aiText,
+        riskScore: 50,
+        highlights: [
+          { text: "General Review", reason: "Please review the document carefully" },
+        ],
+      };
+    }
+  } catch (error) {
+    console.error("Gemini API Error:", error.response?.data || error.message);
+    throw new Error(`AI Analysis failed: ${error.response?.data?.error?.message || error.message}`);
   }
 }
 
@@ -100,8 +111,9 @@ router.post("/", upload.single("file"), async (req, res) => {
     });
   } catch (err) {
     console.error("Analysis error:", err.message);
+    console.error("Full error:", err);
     res.status(500).json({
-      error: err.response?.data?.error?.message || "Failed to analyze document.",
+      error: err.message || err.response?.data?.error?.message || "Failed to analyze document.",
     });
   }
 });
