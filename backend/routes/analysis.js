@@ -1,79 +1,102 @@
 import express from "express";
 import axios from "axios";
 import dotenv from "dotenv";
+import multer from "multer";
+import pdfParse from "pdf-parse";
 
 dotenv.config();
 const router = express.Router();
 
-router.post("/", async (req, res) => {
-  try {
-    const { text } = req.body;
+const upload = multer({
+  storage: multer.memoryStorage(),
+  
+});
 
-    if (!text || text.trim().length < 30) {
-      return res.status(400).json({
-        error: "Please provide sufficient document text for analysis.",
-      });
+async function getTextFromFile(file) {
+  const { buffer, mimetype, originalname } = file;
+
+  try {
+    if (mimetype.includes("pdf") || originalname.endsWith(".pdf")) {
+      const data = await pdfParse(buffer);
+      return data.text;
     }
 
-    const prompt = `
-You are JuriMate — a legal AI that analyzes documents and provides structured insights.
+    if (mimetype.includes("text") || originalname.endsWith(".txt")) {
+      return buffer.toString("utf8");
+    }
 
-Read the following legal document and provide:
-1. A simplified summary (3-4 sentences in plain English)
-2. A risk score from 0 to 100 (0-40: Safe, 41-70: Needs Attention, 71-100: Risky)
-3. Key highlights/clauses that need attention
+    throw new Error("Only PDF and TXT files are supported");
+  } catch (err) {
+    throw new Error("Failed to read file: " + err.message);
+  }
+}
 
-Document:
-${text}
+async function getAIAnalysis(text) {
+  const url = `https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent?key=${process.env.GEMINI_API_KEY}`;
 
-Return in this JSON format:
+  const prompt = `
+You are JuriMate — a friendly legal AI.
+Summarize this document, give a risk score (0-100), and list key highlights.
+
+Return JSON like this:
 {
-  "simplifiedText": "Brief summary of the document...",
-  "riskScore": 45,
+  "simplifiedText": "...",
+  "riskScore": 50,
   "highlights": [
-    {"text": "Payment Terms", "reason": "Explanation of why this matters"},
-    {"text": "Termination Clause", "reason": "Explanation of why this matters"}
+    {"text": "Clause name", "reason": "Why it's important"}
   ]
 }
 
-Keep the tone friendly and reassuring.
+Document:
+${text}
 `;
 
-    const geminiApiUrl =
-      "https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent?key=" +
-      process.env.GEMINI_API_KEY;
+  const res = await axios.post(url, {
+    contents: [{ parts: [{ text: prompt }] }],
+  });
 
-    const response = await axios.post(geminiApiUrl, {
-      contents: [{ parts: [{ text: prompt }] }],
-    });
+  const aiText =
+    res.data.candidates?.[0]?.content?.parts?.[0]?.text || "No analysis found";
 
-    const aiText =
-      response.data.candidates?.[0]?.content?.parts?.[0]?.text ||
-      "⚠️ No analysis available from Gemini.";
+  const clean = aiText.replace(/```json/g, "").replace(/```/g, "").trim();
 
-    // Try to parse JSON from AI response
-    let parsedData;
-    try {
-      // Remove markdown code blocks if present
-      const cleanText = aiText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-      parsedData = JSON.parse(cleanText);
-    } catch (parseErr) {
-      // Fallback if JSON parsing fails
-      parsedData = {
-        simplifiedText: aiText,
-        riskScore: 50,
-        highlights: [
-          { text: "General Review", reason: "Please review the document carefully" }
-        ]
-      };
+  try {
+    return JSON.parse(clean);
+  } catch {
+    return {
+      simplifiedText: aiText,
+      riskScore: 50,
+      highlights: [
+        { text: "General Review", reason: "Please review the document carefully" },
+      ],
+    };
+  }
+}
+
+router.post("/", upload.single("file"), async (req, res) => {
+  try {
+    let text = "";
+    if (req.file) {
+      text = await getTextFromFile(req.file);
+    } 
+    else if (req.body.text) {
+      text = req.body.text.trim();
     }
 
-    res.json({ 
+    if (!text || text.length < 30) {
+      return res
+        .status(400)
+        .json({ error: "Please upload a valid document or provide text." });
+    }
+
+    const analysis = await getAIAnalysis(text);
+
+    res.json({
       data: {
-        simplifiedText: parsedData.simplifiedText || aiText,
-        riskScore: parsedData.riskScore || 50,
-        highlights: parsedData.highlights || []
-      }
+        simplifiedText: analysis.simplifiedText,
+        riskScore: analysis.riskScore,
+        highlights: analysis.highlights,
+      },
     });
   } catch (err) {
     console.error("Analysis error:", err.message);

@@ -3,7 +3,7 @@ import axios from "axios";
 import { useApp } from "../context/AppContext";
 
 export default function LiveChatSection() {
-  const { documentFile } = useApp(); 
+  const { rawText } = useApp(); 
   const [chatHistory, setChatHistory] = useState([]);
   const [msg, setMsg] = useState("");
   const [loading, setLoading] = useState(false);
@@ -12,6 +12,8 @@ export default function LiveChatSection() {
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [chatHistory.length]);
+
+  const BASE_URL = import.meta.env.VITE_API_URL || "https://jurimate-1-s6az.onrender.com/api";
 
   const sendMessage = async (e) => {
     e.preventDefault();
@@ -23,10 +25,14 @@ export default function LiveChatSection() {
     setLoading(true);
 
     try {
-      const res = await axios.post("https://jurimate-1-s6az.onrender.com/api/chat", {
-        message: msg,
-        document: documentFile || "", 
-      });
+      const res = await axios.post(
+        `${BASE_URL}/chat`,
+        {
+          message: msg,
+          document: rawText || "",
+        },
+        { headers: { "Content-Type": "application/json" } }
+      );
 
       const botMsg = { role: "assistant", text: res.data.reply };
       setChatHistory((prev) => [...prev, botMsg]);

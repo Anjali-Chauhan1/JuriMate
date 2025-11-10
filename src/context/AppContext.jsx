@@ -12,7 +12,7 @@ export function AppProvider({ children }) {
   const [highlights, setHighlights] = useState([]);
   const [chatHistory, setChatHistory] = useState([]);
 
-  const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8080/api";
+  const BASE_URL = import.meta.env.VITE_API_URL || "https://jurimate-1-s6az.onrender.com/api";
 
   const analyze = async (inputText) => {
     const text = (inputText ?? rawText)?.toString().trim();
@@ -59,7 +59,7 @@ export function AppProvider({ children }) {
         `${BASE_URL}/chat`,
         {
           message,
-          context: documentFile || rawText || "",
+          document: rawText || "",
         },
         { headers: { "Content-Type": "application/json" } }
       );
@@ -77,6 +77,13 @@ export function AppProvider({ children }) {
     }
   };
 
+  const resetAnalysis = () => {
+    setSimplifiedText("");
+    setRiskScore(0);
+    setRiskBand("Safe");
+    setHighlights([]);
+  };
+
   const value = useMemo(
     () => ({
       documentFile,
@@ -92,6 +99,7 @@ export function AppProvider({ children }) {
       highlights,
       setHighlights,
       analyze,
+      resetAnalysis,
       chatHistory,
       askChat,
     }),
@@ -114,3 +122,4 @@ export function useApp() {
   if (!ctx) throw new Error("useApp must be used within AppProvider");
   return ctx;
 }
+

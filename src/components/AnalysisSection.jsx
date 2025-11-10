@@ -19,12 +19,13 @@ export default function AnalysisSection() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // ✅ Base URL using env (recommended)
-  const BASE_URL = "https://jurimate-1-s6az.onrender.com";
+  // ✅ Base URL from env with remote fallback
+  const BASE_URL = import.meta.env.VITE_API_URL || "https://jurimate-1-s6az.onrender.com/api";
 
   const analyzeDocument = async () => {
-    if (!documentFile && !rawText) {
-      setError("Please upload or paste a document first.");
+    // Check if either text or file is provided
+    if ((!rawText || rawText.trim().length === 0) && !documentFile) {
+      setError("Please upload a document or paste text first.");
       return;
     }
 
@@ -32,27 +33,40 @@ export default function AnalysisSection() {
     setLoading(true);
 
     try {
-      // ✅ Correct Axios request
-      const res = await axios.post(
-        `${BASE_URL}/api/analyze`,
-        {
-          text: documentFile || rawText,
-          jurisdiction: "India",
-          docType: "Contract",
-        },
-        {
-          headers: { "Content-Type": "application/json" },
-        }
-      );
+      let res;
+
+      // If we have rawText (from pasted text or .txt file), send as JSON
+      if (rawText && rawText.trim().length > 0) {
+        res = await axios.post(
+          `${BASE_URL}/analyze`,
+          {
+            text: rawText,
+            jurisdiction: "India",
+            docType: "Contract",
+          },
+          {
+            headers: { "Content-Type": "application/json" },
+          }
+        );
+      }
+
+      else if (documentFile) {
+        const formData = new FormData();
+        formData.append("file", documentFile);
+        formData.append("jurisdiction", "India");
+        formData.append("docType", "Contract");
+
+        res = await axios.post(`${BASE_URL}/analyze`, formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+      }
 
       const { simplifiedText, highlights, riskScore } = res.data.data;
 
-      // Risk band calculation
       let band = "Safe";
       if (riskScore > 70) band = "Risky";
       else if (riskScore > 40) band = "Needs Attention";
 
-      // Update context
       setSimplifiedText(simplifiedText);
       setHighlights(
         highlights.map((h) => ({
@@ -64,13 +78,15 @@ export default function AnalysisSection() {
       setRiskBand(band);
     } catch (err) {
       console.error("Analysis error:", err);
-      setError(err.response?.data?.error || "Failed to analyze");
+      console.error("Error response:", err.response?.data);
+      console.error("Error status:", err.response?.status);
+      const errorMsg = err.response?.data?.error || err.response?.data?.message || err.message || "Failed to analyze";
+      setError(`Error: ${errorMsg}`);
     } finally {
       setLoading(false);
     }
   };
 
-  // ✅ Dynamic color band styling
   const color =
     riskBand === "Safe"
       ? "bg-green-100 text-green-800 border-green-200"
