@@ -25,8 +25,7 @@ export default function Navbar() {
         </div>
       </nav>
       <div className="h-1 bg-linear-to-r from-brand-600/20 via-transparent to-brand-600/20" />
-      {/* tiny active indicator when on /lawyers */}
-      {pathname === "/lawyers" && (
+         {pathname === "/lawyers" && (
         <div cl assName="w-full bg-brand-50 text-center text-xs text-brand-700 py-1">
           Browse verified lawyers & book a consult
         </div>

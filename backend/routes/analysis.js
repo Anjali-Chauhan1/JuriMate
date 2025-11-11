@@ -9,7 +9,22 @@ const router = express.Router();
 
 const upload = multer({
   storage: multer.memoryStorage(),
-  
+  limits: {
+    fileSize: 10 * 1024 * 1024, 
+  },
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = ['application/pdf', 'text/plain'];
+    const allowedExtensions = ['.pdf', '.txt'];
+    
+    const hasValidMime = allowedTypes.includes(file.mimetype);
+    const hasValidExt = allowedExtensions.some(ext => file.originalname.toLowerCase().endsWith(ext));
+    
+    if (hasValidMime || hasValidExt) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only PDF and TXT files are allowed'));
+    }
+  }
 });
 
 async function getTextFromFile(file) {
@@ -17,8 +32,32 @@ async function getTextFromFile(file) {
 
   try {
     if (mimetype.includes("pdf") || originalname.endsWith(".pdf")) {
-      const data = await pdfParse(buffer);
-      return data.text;
+      try {
+        const data = await pdfParse(buffer);
+        if (data.text && data.text.trim().length > 0) {
+          return data.text;
+        }
+        throw new Error("PDF appears to be empty or unreadable");
+      } catch (pdfError) {
+        console.error("PDF parsing error:", pdfError.message);
+        
+      
+        try {
+          const data = await pdfParse(buffer, {
+            max: 0, 
+            version: 'v2.0.550' 
+          });
+          if (data.text && data.text.trim().length > 0) {
+            return data.text;
+          }
+        } catch (retryError) {
+          console.error("PDF retry parsing error:", retryError.message);
+        }
+        
+        throw new Error(
+          `Unable to parse PDF: ${pdfError.message}. The PDF may be corrupted, password-protected, or use an unsupported format. Please try a different file or convert it to text.`
+        );
+      }
     }
 
     if (mimetype.includes("text") || originalname.endsWith(".txt")) {
@@ -27,7 +66,7 @@ async function getTextFromFile(file) {
 
     throw new Error("Only PDF and TXT files are supported");
   } catch (err) {
-    throw new Error("Failed to read file: " + err.message);
+    throw err;
   }
 }
 
@@ -84,38 +123,51 @@ ${text}
   }
 }
 
-router.post("/", upload.single("file"), async (req, res) => {
-  try {
-    let text = "";
-    if (req.file) {
-      text = await getTextFromFile(req.file);
-    } 
-    else if (req.body.text) {
-      text = req.body.text.trim();
+router.post("/", (req, res) => {
+  upload.single("file")(req, res, async (err) => {
+    if (err instanceof multer.MulterError) {
+      if (err.code === 'LIMIT_FILE_SIZE') {
+        return res.status(400).json({ error: 'File size exceeds 10MB limit' });
+      }
+      return res.status(400).json({ error: `Upload error: ${err.message}` });
+    } else if (err) {
+      return res.status(400).json({ error: err.message });
     }
 
-    if (!text || text.length < 30) {
-      return res
-        .status(400)
-        .json({ error: "Please upload a valid document or provide text." });
+    try {
+      let text = "";
+      if (req.file) {
+        console.log(`Processing file: ${req.file.originalname}, size: ${req.file.size} bytes`);
+        text = await getTextFromFile(req.file);
+      } 
+      else if (req.body.text) {
+        text = req.body.text.trim();
+      }
+
+      if (!text || text.length < 30) {
+        return res
+          .status(400)
+          .json({ error: "Please upload a valid document or provide text." });
+      }
+
+      console.log(`Extracted text length: ${text.length} characters`);
+      const analysis = await getAIAnalysis(text);
+
+      res.json({
+        data: {
+          simplifiedText: analysis.simplifiedText,
+          riskScore: analysis.riskScore,
+          highlights: analysis.highlights,
+        },
+      });
+    } catch (err) {
+      console.error("Analysis error:", err.message);
+      console.error("Full error:", err);
+      res.status(500).json({
+        error: err.message || err.response?.data?.error?.message || "Failed to analyze document.",
+      });
     }
-
-    const analysis = await getAIAnalysis(text);
-
-    res.json({
-      data: {
-        simplifiedText: analysis.simplifiedText,
-        riskScore: analysis.riskScore,
-        highlights: analysis.highlights,
-      },
-    });
-  } catch (err) {
-    console.error("Analysis error:", err.message);
-    console.error("Full error:", err);
-    res.status(500).json({
-      error: err.message || err.response?.data?.error?.message || "Failed to analyze document.",
-    });
-  }
+  });
 });
 
 export default router;

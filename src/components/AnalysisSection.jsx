@@ -19,11 +19,10 @@ export default function AnalysisSection() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // ✅ Base URL from env with remote fallback
   const BASE_URL = import.meta.env.VITE_API_URL || "https://jurimate-1-s6az.onrender.com/api";
 
   const analyzeDocument = async () => {
-    // Check if either text or file is provided
+   
     if ((!rawText || rawText.trim().length === 0) && !documentFile) {
       setError("Please upload a document or paste text first.");
       return;

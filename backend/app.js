@@ -8,7 +8,7 @@ dotenv.config();
 
 const app = express();
 
-// CORS configuration
+// CORS 
 const corsOptions = {
   origin: process.env.CORS_ORIGIN || "http://localhost:5174",
   credentials: true,
