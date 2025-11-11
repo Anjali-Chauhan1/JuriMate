@@ -9,7 +9,7 @@ router.post("/", async (req, res) => {
   try {
     const { message, document } = req.body;
 
-    // If both are missing -> return error
+    // ✅ Allow message-only, document-only, or both
     if (!message && !document) {
       return res.status(400).json({
         error: "Send at least a message or a document.",
@@ -18,42 +18,42 @@ router.post("/", async (req, res) => {
 
     let prompt = "";
 
-    // Case 1: Only document → Summarize it
+    // ✅ Only document → Summarize
     if (document && !message) {
       prompt = `
 You are JuriMate — an intelligent AI Legal Assistant.
-Summarize the legal document below in simple and clear language.
+Summarize the legal document below in simple, clear language.
 
 Document:
 ${document}
 
 Instructions:
-- Extract key legal points.
+- Highlight key legal points.
 - Explain in plain English.
-- Keep it concise (5–7 lines).
+- Keep answer concise (5–7 lines).
 `;
     }
 
-    // Case 2: Only message → General legal question handling
+    // ✅ Only message → General legal Q&A
     if (message && !document) {
       prompt = `
 You are JuriMate — an intelligent AI Legal Assistant.
-The user has asked a legal question.
 
 User Question:
 ${message}
 
-If needed, politely request the related legal document for more precise analysis.
-Keep your answer short (4–6 lines) and avoid complex legal jargon.
+If the question requires context from a document, say:
+"I may need the related document to answer this more accurately."
+
+Respond in 4–6 lines, keep it simple.
 `;
     }
 
-    // Case 3: Both message + document → Answer using the document
+    // ✅ Both available → Answer using document only
     if (message && document) {
       prompt = `
 You are JuriMate — an intelligent AI Legal Assistant.
-You have been given a legal document and a user's question.
-Answer ONLY using the document content.
+Answer the user's question strictly based on the document content.
 
 Document:
 ${document}
@@ -63,9 +63,9 @@ ${message}
 
 Instructions:
 - Answer in 3–6 lines.
-- Refer to relevant clauses if present.
-- Do not make up any information.
-- If the document does not cover this, say: "This point isn't specified in the document."
+- Refer to relevant clauses if possible.
+- Do not add extra information.
+- If document does not answer this, say: "This point isn't specified in the document."
 `;
     }
 
@@ -82,11 +82,13 @@ Instructions:
       "⚠ No response from AI.";
 
     res.json({ reply });
+
   } catch (err) {
     console.error("Chat route error:", err.message);
     res.status(500).json({
       error:
-        err.response?.data?.error?.message || "Failed to process chat request.",
+        err.response?.data?.error?.message ||
+        "Failed to process chat request.",
     });
   }
 });

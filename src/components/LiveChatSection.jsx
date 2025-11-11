@@ -3,7 +3,7 @@ import axios from "axios";
 import { useApp } from "../context/AppContext";
 
 export default function LiveChatSection() {
-  const { rawText } = useApp(); 
+  const { rawText } = useApp(); // ✅ Document text from context
   const [chatHistory, setChatHistory] = useState([]);
   const [msg, setMsg] = useState("");
   const [loading, setLoading] = useState(false);
@@ -19,17 +19,17 @@ export default function LiveChatSection() {
     e.preventDefault();
     if (!msg.trim()) return;
 
-   const userMsg = { role: "user", text: msg };
+    const userMsg = { role: "user", text: msg };
     setChatHistory((prev) => [...prev, userMsg]);
     setMsg("");
     setLoading(true);
 
     try {
       const res = await axios.post(
-        `${BASE_URL}/chat`,
+        ${BASE_URL}/chat,
         {
           message: msg,
-          document: rawText || "",
+          ...(rawText ? { document: rawText } : {}), // ✅ Only send document if exists
         },
         { headers: { "Content-Type": "application/json" } }
       );
@@ -40,7 +40,7 @@ export default function LiveChatSection() {
       console.error(err);
       setChatHistory((prev) => [
         ...prev,
-        { role: "assistant", text: "⚠️ Unable to get a response. Try again." },
+        { role: "assistant", text: "⚠ Unable to get a response. Try again." },
       ]);
     } finally {
       setLoading(false);
@@ -65,6 +65,7 @@ export default function LiveChatSection() {
                 No messages yet. Try asking “Is there any refund clause?”
               </p>
             )}
+
             {chatHistory.map((c, i) => (
               <div
                 key={i}
@@ -77,11 +78,13 @@ export default function LiveChatSection() {
                 {c.text}
               </div>
             ))}
+
             {loading && (
               <div className="max-w-[85%] my-2 p-3 rounded-xl bg-gray-100 text-gray-500 italic">
                 Typing...
               </div>
             )}
+
             <div ref={endRef} />
           </div>
 
@@ -116,3 +119,4 @@ export default function LiveChatSection() {
     </section>
   );
 }
+
