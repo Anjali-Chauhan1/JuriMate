@@ -38,7 +38,6 @@ async function getAIAnalysis(text) {
     throw new Error("GEMINI_API_KEY is not configured");
   }
 
-  // Use v1beta endpoint with gemini-1.5-flash-latest
   const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
   const prompt = `You are JuriMate — a friendly legal AI assistant.
@@ -80,13 +79,11 @@ ${text}`;
       throw new Error("Empty response from AI model");
     }
 
-    // Clean up the response
     const clean = aiText.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
 
     try {
       const parsed = JSON.parse(clean);
       
-      // Validate the response structure
       if (!parsed.simplifiedText || typeof parsed.riskScore !== 'number' || !Array.isArray(parsed.highlights)) {
         throw new Error("Invalid response structure");
       }
