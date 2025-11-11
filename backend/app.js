@@ -9,12 +9,11 @@ dotenv.config();
 const app = express();
 
 // CORS 
-const corsOptions = {
-  origin: process.env.CORS_ORIGIN || "http://localhost:5174",
-  credentials: true,
-};
+app.use(cors({
+    origin: process.env.CORS_ORIGIN,
+    credentials:true
+}))
 
-app.use(cors(corsOptions));
 app.use(express.json({ limit: "10mb" }));
 
 app.get("/", (req, res) => {
