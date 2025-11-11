@@ -15,7 +15,8 @@ router.post("/", async (req, res) => {
         .json({ error: "Both message and document are required." });
     }
 
-    const prompt = `
+    const prompt = document && document.trim()
+      ? `
 You are JuriMate — an intelligent AI Legal Assistant.
 You have been given a legal document and a user's question.
 Answer ONLY using the document content, and from a legal point of view.
@@ -30,7 +31,7 @@ Instructions:
 - Analyze the question in context of the document.
 - Quote or refer to relevant clauses where applicable.
 - Explain in plain English, avoiding legal jargon.
-- If the document doesn’t contain the answer, clearly say: “This point isn’t specified in the document.”
+- If the document doesn't contain the answer, clearly say: "This point isn't specified in the document."
 - Keep the answer short (3–6 lines) and precise.
 - Avoid adding made-up information.
 
@@ -41,7 +42,8 @@ Respond in this format:
 
 **📚 Reference:**
 (If applicable, mention the clause or section)
-`;
+`
+      : "";
 
     const geminiApiUrl =
       "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" +
