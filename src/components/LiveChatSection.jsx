@@ -26,7 +26,7 @@ export default function LiveChatSection() {
 
     try {
       const res = await axios.post(
-        ${BASE_URL}/chat,
+        `${BASE_URL}/chat`,
         {
           message: msg,
           ...(rawText ? { document: rawText } : {}), // ✅ Only send document if exists
