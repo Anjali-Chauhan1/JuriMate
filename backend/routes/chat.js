@@ -9,17 +9,51 @@ router.post("/", async (req, res) => {
   try {
     const { message, document } = req.body;
 
-    if (!message || !document) {
-      return res
-        .status(400)
-        .json({ error: "Both message and document are required." });
+    // If both are missing -> return error
+    if (!message && !document) {
+      return res.status(400).json({
+        error: "Send at least a message or a document.",
+      });
     }
 
-    const prompt = document && document.trim()
-      ? `
+    let prompt = "";
+
+    // Case 1: Only document → Summarize it
+    if (document && !message) {
+      prompt = `
+You are JuriMate — an intelligent AI Legal Assistant.
+Summarize the legal document below in simple and clear language.
+
+Document:
+${document}
+
+Instructions:
+- Extract key legal points.
+- Explain in plain English.
+- Keep it concise (5–7 lines).
+`;
+    }
+
+    // Case 2: Only message → General legal question handling
+    if (message && !document) {
+      prompt = `
+You are JuriMate — an intelligent AI Legal Assistant.
+The user has asked a legal question.
+
+User Question:
+${message}
+
+If needed, politely request the related legal document for more precise analysis.
+Keep your answer short (4–6 lines) and avoid complex legal jargon.
+`;
+    }
+
+    // Case 3: Both message + document → Answer using the document
+    if (message && document) {
+      prompt = `
 You are JuriMate — an intelligent AI Legal Assistant.
 You have been given a legal document and a user's question.
-Answer ONLY using the document content, and from a legal point of view.
+Answer ONLY using the document content.
 
 Document:
 ${document}
@@ -28,22 +62,12 @@ User Question:
 ${message}
 
 Instructions:
-- Analyze the question in context of the document.
-- Quote or refer to relevant clauses where applicable.
-- Explain in plain English, avoiding legal jargon.
-- If the document doesn't contain the answer, clearly say: "This point isn't specified in the document."
-- Keep the answer short (3–6 lines) and precise.
-- Avoid adding made-up information.
-
-Respond in this format:
-
-**🧾 Answer:**
-(Your concise answer here)
-
-**📚 Reference:**
-(If applicable, mention the clause or section)
-`
-      : "";
+- Answer in 3–6 lines.
+- Refer to relevant clauses if present.
+- Do not make up any information.
+- If the document does not cover this, say: "This point isn't specified in the document."
+`;
+    }
 
     const geminiApiUrl =
       "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" +
@@ -54,8 +78,8 @@ Respond in this format:
     });
 
     const reply =
-      response.data.candidates?.[0]?.content?.parts?.[0]?.text ||
-      "⚠️ No response from AI.";
+      response?.data?.candidates?.[0]?.content?.parts?.[0]?.text ||
+      "⚠ No response from AI.";
 
     res.json({ reply });
   } catch (err) {
