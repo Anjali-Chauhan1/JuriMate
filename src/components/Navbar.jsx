@@ -1,35 +1,49 @@
 import { Link, useLocation } from "react-router-dom";
+import { Scale, MessageSquareText, FileText, Users } from "lucide-react";
 
 export default function Navbar() {
   const { pathname } = useLocation();
+
   return (
-    <header className="sticky top-z-50 min-h-full bg-white/80 backdrop-blur shadow-sm">
+    <header className="sticky top-0 z-50 bg-neutral-900/90 backdrop-blur-xl border-b border-neutral-800 shadow-md">
       <nav className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+        
+        {/* Logo Section */}
         <Link to="/" className="flex items-center gap-2 group">
-          <span className="text-2xl font-black text-brand-700 group-hover:text-brand-600 transition">JuriMate</span>
-          <span className="text-xs px-20  py-0.5 rounded bg-brand-100 text-brand-700">beta</span>
+          <Scale className="w-6 h-6 text-white group-hover:text-brand-300 transition-all" />
+          <span className="text-2xl font-black text-white tracking-tight group-hover:text-brand-400 transition">
+            JuriMate
+          </span>
         </Link>
-        <div className="flex items-center gap-6 text-sm">
-          <a href="/#document" className="hover:text-brand-600">Start</a>
-          <a href="/#analysis" className="hover:text-brand-600">Analysis</a>
-          <a href="/#chat" className="hover:text-brand-600">Chat</a>
-          <Link to="/lawyers" className="hover:text-brand-600">Lawyers</Link>
-        </div>
-       <div>
+
+        {/* Navigation Links */}
+        <div className="hidden md:flex items-center gap-8 text-sm font-medium">
           <a
             href="/#document"
-            className="px-4 py-2 rounded-lg bg-brand-600 text-white hover:bg-brand-700 transition"
+            className="flex items-center gap-1 text-gray-300 hover:text-brand-400 transition-colors"
           >
-            Start Analysis
+            <FileText size={14} /> Start
           </a>
+          <a
+            href="/#analysis"
+            className="flex items-center gap-1 text-gray-300 hover:text-brand-400 transition-colors"
+          >
+            <Scale size={14} /> Analysis
+          </a>
+          <a
+            href="/#chat"
+            className="flex items-center gap-1 text-gray-300 hover:text-brand-400 transition-colors"
+          >
+            <MessageSquareText size={14} /> Chat
+          </a>
+          <Link
+            to="/lawyers"
+            className="flex items-center gap-1 text-gray-300 hover:text-brand-400 transition-colors"
+          >
+            <Users size={14} /> Lawyers
+          </Link>
         </div>
       </nav>
-      <div className="h-1 bg-linear-to-r from-brand-600/20 via-transparent to-brand-600/20" />
-         {pathname === "/lawyers" && (
-        <div cl assName="w-full bg-brand-50 text-center text-xs text-brand-700 py-1">
-          Browse verified lawyers & book a consult
-        </div>
-      )}
     </header>
   );
 }
