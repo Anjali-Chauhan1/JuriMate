@@ -1,4 +1,5 @@
 import express from "express";
+import mongoose from "mongoose";
 import analysisRoutes from "./analysis.js";
 import chatRoutes from "./chat.js";
 import highlightRoutes from "./highlight.js";
