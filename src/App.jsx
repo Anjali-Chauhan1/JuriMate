@@ -19,8 +19,8 @@ export default function App() {
       <Routes>
         <Route path="/signup" element={<Signup/>} />
         <Route path="/login" element={<Login/>} />
-        <Route path="/" element={localStorage.getItem("token") ? <Home /> : <Navigate to="/signup" replace />} />
-        <Route path="/lawyers" element={localStorage.getItem("token") ? <LawyerPage /> : <Navigate to="/signup" replace />} />
+        <Route path="/" element={localStorage.getItem("token") ? <Home /> : <Navigate to="/login" replace />} />
+        <Route path="/lawyers" element={localStorage.getItem("token") ? <LawyerPage /> : <Navigate to="/login" replace />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>

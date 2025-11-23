@@ -18,7 +18,7 @@ export default function Login() {
       localStorage.setItem("token", res.data.token);
 
       alert("Login successful");
-      navigate("/home");
+      navigate("/");
 
     } catch (err) {
       alert(err.response?.data?.message || "Login failed");
@@ -68,6 +68,7 @@ export default function Login() {
           <button
             type="submit"
             className="w-full p-3 rounded-lg bg-yellow-500 text-black font-semibold text-lg hover:bg-yellow-400 transition-all shadow-lg"
+             onClick={() => navigate('/')}
           >
             Login
           </button>
