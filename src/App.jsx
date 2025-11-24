@@ -13,7 +13,7 @@ export default function App() {
     const isAuthPage = window.location.pathname === '/login' || window.location.pathname === '/signup';
     
     if (!token && !isAuthPage) {
-      return <Navigate to="/login" replace />;
+      return <Navigate to="/signup" replace />;
     }
     
     if (token && isAuthPage) {

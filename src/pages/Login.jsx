@@ -15,7 +15,8 @@ export default function Login() {
         data
       );
 
-      localStorage.setItem("token", res.data.accessToken);
+      localStorage.setItem("accessToken", res.data.accessToken);
+      localStorage.setItem("refreshToken", res.data.refreshToken);
 
       alert("Login successful");
       navigate("/");
