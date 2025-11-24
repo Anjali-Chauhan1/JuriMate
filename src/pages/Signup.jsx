@@ -83,7 +83,6 @@ const [data, setData] = useState({
           <button
             type="submit"
             className="w-full p-3 rounded-lg bg-yellow-500 text-black font-semibold text-lg hover:bg-yellow-400 transition-all shadow-lg"
-             onClick={() => navigate('/login')}
           >
             Create Account
           </button>

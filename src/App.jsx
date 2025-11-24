@@ -9,18 +9,43 @@ import { AppProvider } from "./context/AppContext";
 
 export default function App() {
   function ProtectedRoute({ children }) {
-  const token = localStorage.getItem("token"); 
-  if (!token) return <Navigate to="/login" replace />;
-  return children;
-}
+    const token = localStorage.getItem("token");
+    const isAuthPage = window.location.pathname === '/login' || window.location.pathname === '/signup';
+    
+    if (!token && !isAuthPage) {
+      return <Navigate to="/login" replace />;
+    }
+    
+    if (token && isAuthPage) {
+      return <Navigate to="/" replace />;
+    }
+    
+    return children;
+  }
  return (
     <AppProvider>
       <BrowserRouter>
       <Routes>
-        <Route path="/signup" element={<Signup/>} />
-        <Route path="/login" element={<Login/>} />
-        <Route path="/" element={localStorage.getItem("token") ? <Home /> : <Navigate to="/signup" replace />} />
-        <Route path="/lawyers" element={localStorage.getItem("token") ? <LawyerPage /> : <Navigate to="/login" replace />} />
+        <Route path="/signup" element={
+          <ProtectedRoute>
+            <Signup/>
+          </ProtectedRoute>
+        } />
+        <Route path="/login" element={
+          <ProtectedRoute>
+            <Login/>
+          </ProtectedRoute>
+        } />
+        <Route path="/" element={
+          <ProtectedRoute>
+            <Home />
+          </ProtectedRoute>
+        } />
+        <Route path="/lawyers" element={
+          <ProtectedRoute>
+            <LawyerPage />
+          </ProtectedRoute>
+        } />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>

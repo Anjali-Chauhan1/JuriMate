@@ -13,7 +13,15 @@ const signup = async (req, res) => {
 
     const user = await User.create({ name, email, password: hashedPass });
 
-    res.json({ message: "Signup successful", user });
+   const accessToken = jwt.sign(
+  { id: user._id },
+  process.env.ACCESS_TOKEN_SECRET,
+  { expiresIn: process.env.ACCESS_TOKEN_EXPIRY }
+);
+
+res.json({ message: "Signup successful", accessToken, user });
+
+
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
