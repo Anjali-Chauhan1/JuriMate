@@ -9,8 +9,9 @@ dotenv.config();
 const app = express();
 
 // CORS 
+const allowedOrigins = process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',').map(item => item.trim()) : "*";
 app.use(cors({
-    origin: process.env.CORS_ORIGIN,
+    origin: allowedOrigin,
     credentials:true
 }))
 
