@@ -1,6 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate,Link } from "react-router-dom";
 
 export default function Login() {
      const navigate = useNavigate();
@@ -79,9 +79,9 @@ export default function Login() {
         {/* Footer */}
         <p className="mt-5 text-center text-sm text-gray-300">
           Don't have an account?{" "}
-          <a href="/signup" className="text-yellow-400 hover:underline">
+          <Link to="/signup" className="text-yellow-400 hover:underline">
             Sign up
-          </a>
+          </Link>
         </p>
       </div>
     </div>

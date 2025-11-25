@@ -5,6 +5,7 @@ import chatRoutes from "./chat.js";
 import highlightRoutes from "./highlight.js";
 import riskRoutes from "./risk.js";
 import { signup,login } from "../controllers/authController.js";
+import "dotenv/config"
 
 const router = express.Router();
 
