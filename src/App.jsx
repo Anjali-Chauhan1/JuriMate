@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route,useLocation , Navigate } from "react-router-dom";
 import Home from "./pages/Home";
 import LawyerPage from "./pages/LawyerPage";
 import NotFound from "./pages/NotFound";
@@ -9,19 +9,22 @@ import { AppProvider } from "./context/AppContext";
 
 export default function App() {
   function ProtectedRoute({ children }) {
-    const token = localStorage.getItem("token");
-    const isAuthPage = window.location.pathname === '/login' || window.location.pathname === '/signup';
-    
-    if (!token && !isAuthPage) {
-      return <Navigate to="/signup" replace />;
-    }
-    
-    if (token && isAuthPage) {
-      return <Navigate to="/" replace />;
-    }
-    
-    return children;
+  const token = localStorage.getItem("token");
+  const location = useLocation();
+
+  const isAuthPage =
+    location.pathname === "/login" || location.pathname === "/signup";
+
+  if (!token && !isAuthPage) {
+    return <Navigate to="/signup" replace />;
   }
+
+  if (token && isAuthPage) {
+    return <Navigate to="/" replace />;
+  }
+
+  return children;
+}
  return (
     <AppProvider>
       <BrowserRouter>
