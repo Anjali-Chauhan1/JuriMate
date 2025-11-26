@@ -9,7 +9,7 @@ import { AppProvider } from "./context/AppContext";
 
 export default function App() {
   function ProtectedRoute({ children }) {
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("accessToken");
   const location = useLocation();
 
   const isAuthPage =
