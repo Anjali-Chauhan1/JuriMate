@@ -9,14 +9,14 @@ import { AppProvider } from "./context/AppContext";
 
 export default function App() {
   function ProtectedRoute({ children }) {
-  const token = localStorage.getItem("accessToken");
+  const token = localStorage.getItem("accessToken"); 
   const location = useLocation();
 
   const isAuthPage =
     location.pathname === "/login" || location.pathname === "/signup";
 
   if (!token && !isAuthPage) {
-    return <Navigate to="/signup" replace />;
+    return <Navigate to="/login" replace />;  
   }
 
   if (token && isAuthPage) {
@@ -25,32 +25,36 @@ export default function App() {
 
   return children;
 }
+
  return (
     <AppProvider>
       <BrowserRouter>
-      <Routes>
-        <Route path="/signup" element={
-          <ProtectedRoute>
-            <Signup/>
-          </ProtectedRoute>
-        } />
-        <Route path="/login" element={
-          <ProtectedRoute>
-            <Login/>
-          </ProtectedRoute>
-        } />
-        <Route path="/" element={
-          <ProtectedRoute>
-            <Home />
-          </ProtectedRoute>
-        } />
-        <Route path="/lawyers" element={
-          <ProtectedRoute>
-            <LawyerPage />
-          </ProtectedRoute>
-        } />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+     <Routes>
+  {/* PUBLIC ROUTES */}
+  <Route path="/signup" element={<Signup />} />
+  <Route path="/login" element={<Login />} />
+
+  {/* PROTECTED ROUTES */}
+  <Route
+    path="/"
+    element={
+      <ProtectedRoute>
+        <Home />
+      </ProtectedRoute>
+    }
+  />
+
+  <Route
+    path="/lawyers"
+    element={
+      <ProtectedRoute>
+        <LawyerPage />
+      </ProtectedRoute>
+    }
+  />
+
+  <Route path="*" element={<NotFound />} />
+</Routes>
     </BrowserRouter>
     </AppProvider>
   )
