@@ -15,9 +15,13 @@ const [data, setData] = useState({
 
     try {
       const res = await axios.post(
-        "https://jurimate-1-s6az.onrender.com/api/signup",
-        data
-      );
+  "https://jurimate-1-s6az.onrender.com/api/signup",
+  data,
+  {
+    withCredentials: true,
+    headers: { "Content-Type": "application/json" }
+  }
+);
 
       alert("Signup successful! Please login now.");
       navigate("/login");

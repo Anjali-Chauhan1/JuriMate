@@ -9,11 +9,21 @@ dotenv.config();
 const app = express();
 
 // CORS 
-const allowedOrigins = process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',').map(item => item.trim()) : "*";
 app.use(cors({
-    origin: allowedOrigins,
-    credentials:true
-}))
+  origin: (origin, callback) => {
+    if (!origin || origin.startsWith("http://localhost")) {
+      return callback(null, true);
+    }
+
+    const allowed = ["https://juri-mate.vercel.app"];
+    if (allowed.includes(origin)) {
+      return callback(null, true);
+    }
+
+    return callback(new Error("CORS Not Allowed: " + origin));
+  },
+  credentials: true,
+}));
 
 app.use(express.json({ limit: "10mb" }));
 

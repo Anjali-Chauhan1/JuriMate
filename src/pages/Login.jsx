@@ -11,9 +11,14 @@ export default function Login() {
 
     try {
       const res = await axios.post(
-        "https://jurimate-1-s6az.onrender.com/api/login",
-        data
-      );
+  "https://jurimate-1-s6az.onrender.com/api/login",
+  data,
+  {
+    withCredentials: true,
+    headers: { "Content-Type": "application/json" }
+  }
+);
+
 
       localStorage.setItem("accessToken", res.data.accessToken);
       localStorage.setItem("refreshToken", res.data.refreshToken);
