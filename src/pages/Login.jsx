@@ -1,27 +1,27 @@
 import { useState } from "react";
 import axios from "axios";
-import { useNavigate,Link } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import { useApp } from "../context/AppContext";
 
 export default function Login() {
      const navigate = useNavigate();
      const [data, setData] = useState({ email: "", password: "" });
+     const { login } = useApp();
 
   const handleLogin = async (e) => {
     e.preventDefault();
 
     try {
       const res = await axios.post(
-  "https://jurimate-1-s6az.onrender.com/api/login",
-  data,
-  {
-    withCredentials: true,
-    headers: { "Content-Type": "application/json" }
-  }
-);
+        "https://jurimate-1-s6az.onrender.com/api/login",
+        data,
+        {
+          withCredentials: true,
+          headers: { "Content-Type": "application/json" }
+        }
+      );
 
-
-      localStorage.setItem("accessToken", res.data.accessToken);
-      localStorage.setItem("refreshToken", res.data.refreshToken);
+      login(res.data.accessToken, res.data.refreshToken, res.data.user);
 
       alert("Login successful");
       navigate("/");
@@ -35,20 +35,20 @@ export default function Login() {
     <div className="min-h-screen flex items-center justify-center bg-black text-white px-4">
       <div className="w-full max-w-md bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-xl">
 
-        {/* Title */}
+        
         <h2 className="text-3xl font-bold mb-6 text-center tracking-wide">
-          Welcome Back to <span className="text-yellow-400">Jurimate</span>
+          Welcome Back to <span className="text-white">JuriMate</span>
         </h2>
 
         <form onSubmit={handleLogin} className="space-y-5">
 
-          {/* Email */}
+          
           <div>
             <label className="text-sm font-semibold opacity-80">Email Address</label>
             <input
               required
               type="email"
-              className="mt-1 w-full p-3 bg-black/40 border border-white/20 rounded-lg focus:ring-2 focus:ring-yellow-400 outline-none"
+              className="mt-1 w-full p-3 bg-black/40 border border-white/20 rounded-lg focus:ring-2 focus:ring-white/50 outline-none"
               placeholder="example@mail.com"
               onChange={(e) =>
                 setData({ ...data, email: e.target.value })
@@ -56,13 +56,12 @@ export default function Login() {
             />
           </div>
 
-          {/* Password */}
           <div>
             <label className="text-sm font-semibold opacity-80">Password</label>
             <input
               required
               type="password"
-              className="mt-1 w-full p-3 bg-black/40 border border-white/20 rounded-lg focus:ring-2 focus:ring-yellow-400 outline-none"
+              className="mt-1 w-full p-3 bg-black/40 border border-white/20 rounded-lg focus:ring-2 focus:ring-white/50 outline-none"
               placeholder="••••••••"
               onChange={(e) =>
                 setData({ ...data, password: e.target.value })
@@ -70,10 +69,10 @@ export default function Login() {
             />
           </div>
 
-          {/* Button */}
+         
           <button
             type="submit"
-            className="w-full p-3 rounded-lg bg-yellow-500 text-black font-semibold text-lg hover:bg-yellow-400 transition-all shadow-lg"
+            className="w-full p-3 rounded-lg bg-white text-black font-semibold text-lg hover:bg-gray-200 transition-all shadow-lg"
          
 
           >
@@ -81,10 +80,9 @@ export default function Login() {
           </button>
         </form>
 
-        {/* Footer */}
         <p className="mt-5 text-center text-sm text-gray-300">
           Don't have an account?{" "}
-          <Link to="/signup" className="text-yellow-400 hover:underline">
+          <Link to="/signup" className="text-white hover:underline">
             Sign up
           </Link>
         </p>

@@ -11,6 +11,8 @@ export function AppProvider({ children }) {
   const [riskBand, setRiskBand] = useState("Safe");
   const [highlights, setHighlights] = useState([]);
   const [chatHistory, setChatHistory] = useState([]);
+  const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('accessToken'));
+  const [user, setUser] = useState(null);
 
   const BASE_URL = import.meta.env.VITE_API_URL || "https://jurimate-1-s6az.onrender.com/api";
 
@@ -84,6 +86,22 @@ export function AppProvider({ children }) {
     setHighlights([]);
   };
 
+  const logout = () => {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    setIsAuthenticated(false);
+    setUser(null);
+    resetAnalysis();
+    setChatHistory([]);
+  };
+
+  const login = (token, refreshToken, userData) => {
+    localStorage.setItem('accessToken', token);
+    localStorage.setItem('refreshToken', refreshToken);
+    setIsAuthenticated(true);
+    setUser(userData);
+  };
+
   const value = useMemo(
     () => ({
       documentFile,
@@ -102,6 +120,10 @@ export function AppProvider({ children }) {
       resetAnalysis,
       chatHistory,
       askChat,
+      isAuthenticated,
+      user,
+      login,
+      logout,
     }),
     [
       documentFile,
@@ -111,6 +133,8 @@ export function AppProvider({ children }) {
       riskBand,
       highlights,
       chatHistory,
+      isAuthenticated,
+      user,
     ]
   );
 

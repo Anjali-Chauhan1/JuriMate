@@ -42,7 +42,6 @@ export default function DocumentSection() {
     transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
   />
 
-  {/* Heading */}
   <motion.div
     className="text-center z-10 mb-12"
     initial={{ y: 30, opacity: 0 }}
@@ -55,7 +54,6 @@ export default function DocumentSection() {
     <p className="text-gray-400 text-lg">Choose how you’d like to get started 👇</p>
   </motion.div>
 
-  {/* Option buttons */}
   <AnimatePresence mode="wait">
     {!selectedOption && (
       <motion.div
@@ -66,7 +64,7 @@ export default function DocumentSection() {
         exit={{ y: -30, opacity: 0 }}
         transition={{ duration: 0.6 }}
       >
-        {/* Paste Text Option */}
+   
         <button
           onClick={() => setSelectedOption("text")}
           className="group relative px-8 py-10 w-72 rounded-2xl bg-gray-900/60 hover:bg-gray-800/80 transition backdrop-blur-lg border border-gray-700 hover:border-white/80 shadow-lg hover:shadow-white/20"
@@ -80,7 +78,6 @@ export default function DocumentSection() {
           <div className="absolute bottom-0 left-0 right-0 h-1 bg-linear-to-r from-white to-gray-300 opacity-0 group-hover:opacity-100 transition" />
         </button>
 
-        {/* Upload File Option */}
         <button
           onClick={() => setSelectedOption("file")}
           className="group relative px-8 py-10 w-72 rounded-2xl bg-gray-900/60 hover:bg-gray-800/80 transition backdrop-blur-lg border border-gray-700 hover:border-white/80 shadow-lg hover:shadow-white/20"
@@ -96,7 +93,6 @@ export default function DocumentSection() {
       </motion.div>
     )}
 
-    {/* Paste Text  */}
     {selectedOption === "text" && (
       <motion.div
         key="text"
@@ -118,12 +114,24 @@ export default function DocumentSection() {
         <div className="flex justify-between items-center mt-4">
           <button
             onClick={() => {
-              resetAnalysis();
-              setRawText(localText);
-              setFileName("");
-              window.location.hash = "analysis";
+              if (localText.trim()) {
+                resetAnalysis();
+                setRawText(localText.trim());
+                setFileName("");
+                setSelectedOption(null);
+                
+                setTimeout(() => {
+                  const analysisSection = document.getElementById('analysis');
+                  if (analysisSection) {
+                    analysisSection.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }, 100);
+              } else {
+                alert("Please enter some text before proceeding.");
+              }
             }}
-            className="px-6 py-2 rounded-lg bg-white text-black font-medium hover:bg-gray-200 transition"
+            disabled={!localText.trim()}
+            className="px-6 py-2 rounded-lg bg-white text-black font-medium hover:bg-gray-200 transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Use This Text
           </button>
@@ -137,7 +145,6 @@ export default function DocumentSection() {
       </motion.div>
     )}
 
-    {/* Upload File */}
     {selectedOption === "file" && (
       <motion.div
         key="file"
@@ -172,14 +179,21 @@ export default function DocumentSection() {
           </span>
           <button
             onClick={() => {
-              if (fileName) {
+              if (fileName && localText.trim()) {
                 resetAnalysis();
-              setRawText(localText);
-              setFileName("");
-                window.location.hash = "analysis"
-              }  
+                setSelectedOption(null);
+                
+                setTimeout(() => {
+                  const analysisSection = document.getElementById('analysis');
+                  if (analysisSection) {
+                    analysisSection.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }, 100);
+              } else {
+                alert("Please upload a file with valid content.");
+              }
             }}
-            disabled={!fileName}
+            disabled={!fileName || !localText.trim()}
             className="px-6 py-2 bg-white text-black rounded-lg hover:bg-gray-200 transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Go to Analysis
