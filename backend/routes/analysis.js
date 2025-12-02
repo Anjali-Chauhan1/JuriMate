@@ -143,4 +143,17 @@ router.post("/", upload.single("file"), async (req, res) => {
   }
 });
 
+// Handle GET requests to /analyze (for debugging)
+router.get("/", (req, res) => {
+  res.json({
+    message: "Analysis endpoint is working. Use POST method to analyze documents.",
+    endpoint: "POST /api/analyze",
+    expectedBody: {
+      text: "Document text to analyze",
+      jurisdiction: "India",
+      docType: "Contract"
+    }
+  });
+});
+
 export default router;
