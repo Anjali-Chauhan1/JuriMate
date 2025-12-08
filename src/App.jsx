@@ -28,11 +28,11 @@ function ProtectedRoute({ children }) {
 function AppRoutes() {
   return (
     <Routes>
-      {/* PUBLIC ROUTES */}
+    
       <Route path="/signup" element={<Signup />} />
       <Route path="/login" element={<Login />} />
 
-      {/* PROTECTED ROUTES */}
+    
       <Route
         path="/"
         element={

@@ -28,11 +28,11 @@ useEffect(() => {
     <>
       <Navbar />
      <section className="min-h-screen bg-[#050507] text-white py-20 px-6 md:px-10 relative overflow-hidden">
-  {/* ✨ White Gradient Background Glow */}
+  
   <div className="absolute inset-0 bg-linear-to-br from-white/10 via-gray-300/10 to-transparent blur-3xl pointer-events-none" />
 
   <div className="max-w-7xl mx-auto relative z-10">
-    {/* Header */}
+   
     <motion.h1
       initial={{ y: 50, opacity: 0 }}
       whileInView={{ y: 0, opacity: 1 }}
@@ -47,7 +47,7 @@ useEffect(() => {
       specialty, expertise, or rating.
     </p>
 
-    {/* Search + Filter */}
+  
     <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
       <input
         value={q}
@@ -68,7 +68,6 @@ useEffect(() => {
       </select>
     </div>
 
-    {/* Lawyer Cards */}
     <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
       {list.length > 0 ? (
         list.map((l, i) => (
@@ -94,7 +93,6 @@ useEffect(() => {
               <p className="text-gray-500 text-sm mt-1">per consultation</p>
             </div>
 
-            {/* White Glow Button */}
             <button
               onClick={() => alert(`Booking request sent to ${l.name}`)}
               className="group relative mt-6 w-full px-5 py-3 rounded-xl font-semibold text-black bg-white hover:bg-gray-200 transition overflow-hidden shadow-[0_0_20px_rgba(255,255,255,0.2)]"

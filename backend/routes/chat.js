@@ -9,7 +9,7 @@ router.post("/", async (req, res) => {
   try {
     const { message, document } = req.body;
 
-    // ✅ Allow message-only, document-only, or both
+
     if (!message && !document) {
       return res.status(400).json({
         error: "Send at least a message or a document.",
@@ -18,7 +18,6 @@ router.post("/", async (req, res) => {
 
     let prompt = "";
 
-    // ✅ Only document → Summarize
     if (document && !message) {
       prompt = `
 You are JuriMate — an intelligent AI Legal Assistant.
@@ -34,7 +33,6 @@ Instructions:
 `;
     }
 
-    // ✅ Only message → General legal Q&A
     if (message && !document) {
       prompt = `
 You are JuriMate — an intelligent AI Legal Assistant.
@@ -49,7 +47,7 @@ Respond in 4–6 lines, keep it simple.
 `;
     }
 
-    // ✅ Both available → Answer using document only
+  
     if (message && document) {
       prompt = `
 You are JuriMate — an intelligent AI Legal Assistant.

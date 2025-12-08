@@ -8,7 +8,7 @@ dotenv.config();
 
 const app = express();
 
-// CORS 
+
 app.use(cors({
   origin: (origin, callback) => {
     if (!origin || origin.startsWith("http://localhost")) {

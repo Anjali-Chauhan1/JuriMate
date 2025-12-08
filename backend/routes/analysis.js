@@ -93,7 +93,7 @@ ${text}`;
       console.error("JSON parse error:", parseError.message);
       console.error("AI response:", clean);
       
-      // Return a fallback response with the AI text
+     
       return {
         simplifiedText: aiText,
         riskScore: 50,
@@ -143,7 +143,7 @@ router.post("/", upload.single("file"), async (req, res) => {
   }
 });
 
-// Handle GET requests to /analyze (for debugging)
+
 router.get("/", (req, res) => {
   res.json({
     message: "Analysis endpoint is working. Use POST method to analyze documents.",
