@@ -9,9 +9,11 @@ const [data, setData] = useState({
     email: "",
     password: ""
   });
+const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
 
     try {
       const res = await axios.post(
@@ -28,6 +30,8 @@ const [data, setData] = useState({
 
     } catch (err) {
       alert(err.response?.data?.message || "Signup failed");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -85,9 +89,17 @@ const [data, setData] = useState({
     
           <button
             type="submit"
-            className="w-full p-3 rounded-lg bg-white text-black font-semibold text-lg hover:bg-gray-200 transition-all shadow-lg"
+            disabled={loading}
+            className="w-full p-3 rounded-lg bg-white text-black font-semibold text-lg hover:bg-gray-200 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
           >
-            Create Account
+            {loading ? (
+              <>
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-black mr-2"></div>
+                Creating Account...
+              </>
+            ) : (
+              "Create Account"
+            )}
           </button>
         </form>
 

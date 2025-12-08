@@ -6,10 +6,12 @@ import { useApp } from "../context/AppContext";
 export default function Login() {
      const navigate = useNavigate();
      const [data, setData] = useState({ email: "", password: "" });
+     const [loading, setLoading] = useState(false);
      const { login } = useApp();
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setLoading(true);
 
     try {
       const res = await axios.post(
@@ -28,6 +30,8 @@ export default function Login() {
 
     } catch (err) {
       alert(err.response?.data?.message || "Login failed");
+    } finally {
+      setLoading(false);
     }
 }
 
@@ -72,11 +76,17 @@ export default function Login() {
          
           <button
             type="submit"
-            className="w-full p-3 rounded-lg bg-white text-black font-semibold text-lg hover:bg-gray-200 transition-all shadow-lg"
-         
-
+            disabled={loading}
+            className="w-full p-3 rounded-lg bg-white text-black font-semibold text-lg hover:bg-gray-200 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
           >
-            Login
+            {loading ? (
+              <>
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-black mr-2"></div>
+                Logging in...
+              </>
+            ) : (
+              "Login"
+            )}
           </button>
         </form>
 
