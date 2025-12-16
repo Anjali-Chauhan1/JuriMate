@@ -16,8 +16,9 @@ const [loading, setLoading] = useState(false);
     setLoading(true);
 
     try {
+      const BASE_URL = import.meta.env.VITE_API_URL || "https://jurimate-4.onrender.com/api";
       const res = await axios.post(
-        "https://jurimate-4.onrender.com/api/signup",
+        `${BASE_URL}/signup`,
         data,
         {
           withCredentials: true,

@@ -8,6 +8,8 @@ export default function Login() {
      const [data, setData] = useState({ email: "", password: "" });
      const [loading, setLoading] = useState(false);
      const { login } = useApp();
+     
+     const API_BASE_URL = import.meta.env.VITE_API_URL || "https://jurimate-4.onrender.com/api";
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -15,7 +17,7 @@ export default function Login() {
 
     try {
       const res = await axios.post(
-        "https://jurimate-4.onrender.com/api/login",
+        `${API_BASE_URL}/login`,
         data,
         {
           withCredentials: true,

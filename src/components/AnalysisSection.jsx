@@ -4,6 +4,7 @@ import { motion, useInView } from "framer-motion";
 import { useApp } from "../context/AppContext";
 import { useRef } from "react";
 
+
 export default function AnalysisSection() {
   const {
     documentFile,
@@ -23,8 +24,7 @@ export default function AnalysisSection() {
   const sectionRef = useRef(null);
   const inView = useInView(sectionRef, { once: true, margin: "-100px" });
 
-  const BASE_URL =
-    import.meta.env.VITE_API_URL || "https://jurimate-4.onrender.com/api";
+  const BASE_URL = import.meta.env.VITE_API_URL || "https://jurimate-4.onrender.com/api";
 
   const analyzeDocument = async () => {
     if ((!rawText || rawText.trim().length === 0) && !documentFile) {
