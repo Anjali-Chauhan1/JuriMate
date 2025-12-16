@@ -44,7 +44,7 @@ Now, generate around 3–5 such friendly highlight messages.
 `;
 
     const geminiApiUrl =
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key" +
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key" +
       process.env.GEMINI_API_KEY;
 
     const response = await axios.post(geminiApiUrl, {
