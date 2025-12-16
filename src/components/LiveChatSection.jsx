@@ -9,7 +9,7 @@ export default function LiveChatSection() {
   const [loading, setLoading] = useState(false);
   const endRef = useRef(null);
 
-  const BASE_URL = import.meta.env.VITE_API_URL || "https://jurimate-1-s6az.onrender.com/api";
+  const BASE_URL = import.meta.env.VITE_API_URL || "https://jurimate-4.onrender.com/api";
 
   const sendMessage = async (e) => {
     e.preventDefault();
@@ -36,7 +36,7 @@ export default function LiveChatSection() {
       console.error(err);
       setChatHistory((prev) => [
         ...prev,
-        { role: "assistant", text: "⚠ Unable to get a response. Try again." },
+        { role: "assistant", text: " Unable to get a response. Try again." },
       ]);
     } finally {
       setLoading(false);
@@ -66,7 +66,7 @@ export default function LiveChatSection() {
         <div className="h-80 overflow-y-auto pr-2 space-y-2 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent">
           {chatHistory.length === 0 && (
             <p className="text-sm text-gray-500 text-center py-4">
-              💬 No messages yet. Try asking “Is there any refund clause?”
+               No messages yet. Try asking “Is there any refund clause?”
             </p>
           )}
 

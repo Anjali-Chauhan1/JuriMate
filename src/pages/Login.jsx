@@ -15,7 +15,7 @@ export default function Login() {
 
     try {
       const res = await axios.post(
-        "https://jurimate-1-s6az.onrender.com/api/login",
+        "https://jurimate-4.onrender.com/api/login",
         data,
         {
           withCredentials: true,

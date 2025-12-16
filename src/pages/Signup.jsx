@@ -17,7 +17,7 @@ const [loading, setLoading] = useState(false);
 
     try {
       const res = await axios.post(
-        "https://jurimate-1-s6az.onrender.com/api/signup",
+        "https://jurimate-4.onrender.com/api/signup",
         data,
         {
           withCredentials: true,

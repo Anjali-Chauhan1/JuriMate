@@ -14,7 +14,7 @@ export function AppProvider({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('accessToken'));
   const [user, setUser] = useState(null);
 
-  const BASE_URL = import.meta.env.VITE_API_URL || "https://jurimate-1-s6az.onrender.com/api";
+  const BASE_URL = import.meta.env.VITE_API_URL || "https://jurimate-4.onrender.com/api";
 
   const analyze = async (inputText) => {
     const text = (inputText ?? rawText)?.toString().trim();
@@ -74,7 +74,7 @@ export function AppProvider({ children }) {
       console.error("Chat error:", err);
       setChatHistory((h) => [
         ...h,
-        { role: "assistant", text: "⚠️ Sorry, Gemini couldn't respond." },
+        { role: "assistant", text: "Sorry, Gemini couldn't respond." },
       ]);
     }
   };

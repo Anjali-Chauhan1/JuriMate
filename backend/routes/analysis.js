@@ -9,7 +9,7 @@ const router = express.Router();
 
 const upload = multer({
   storage: multer.memoryStorage(),
-  
+
 });
 
 async function getTextFromFile(file) {
@@ -32,8 +32,8 @@ async function getTextFromFile(file) {
 }
 
 async function getAIAnalysis(text) {
-  const apiKey = process.env.GEMINI_API_KEY;
-  
+  const apiKey = process.env.GEMINI_API_KEY ? process.env.GEMINI_API_KEY.trim() : "";
+
   if (!apiKey) {
     throw new Error("GEMINI_API_KEY is not configured");
   }
@@ -74,7 +74,7 @@ ${text}`;
     }
 
     const aiText = res.data.candidates[0]?.content?.parts?.[0]?.text;
-    
+
     if (!aiText) {
       throw new Error("Empty response from AI model");
     }
@@ -83,17 +83,17 @@ ${text}`;
 
     try {
       const parsed = JSON.parse(clean);
-      
+
       if (!parsed.simplifiedText || typeof parsed.riskScore !== 'number' || !Array.isArray(parsed.highlights)) {
         throw new Error("Invalid response structure");
       }
-      
+
       return parsed;
     } catch (parseError) {
       console.error("JSON parse error:", parseError.message);
       console.error("AI response:", clean);
-      
-     
+
+
       return {
         simplifiedText: aiText,
         riskScore: 50,
@@ -114,7 +114,7 @@ router.post("/", upload.single("file"), async (req, res) => {
     let text = "";
     if (req.file) {
       text = await getTextFromFile(req.file);
-    } 
+    }
     else if (req.body.text) {
       text = req.body.text.trim();
     }

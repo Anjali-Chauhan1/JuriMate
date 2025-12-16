@@ -24,7 +24,7 @@ export default function AnalysisSection() {
   const inView = useInView(sectionRef, { once: true, margin: "-100px" });
 
   const BASE_URL =
-    import.meta.env.VITE_API_URL || "https://jurimate-1-s6az.onrender.com/api";
+    import.meta.env.VITE_API_URL || "https://jurimate-4.onrender.com/api";
 
   const analyzeDocument = async () => {
     if ((!rawText || rawText.trim().length === 0) && !documentFile) {
