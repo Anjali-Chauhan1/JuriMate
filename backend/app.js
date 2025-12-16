@@ -9,10 +9,23 @@ dotenv.config();
 
 const app = express();
 
-app.use("*",cors({
-  origin: ["http://localhost:5173", "https://juri-mate.vercel.app"],
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+
+    if (origin.startsWith("http://localhost")) {
+      return callback(null, true);
+    }
+
+    if (origin === "https://juri-mate.vercel.app") {
+      return callback(null, true);
+    }
+
+    return callback(new Error("Not allowed by CORS"));
+  },
   credentials: true
 }));
+
 app.use(express.json({ limit: "10mb" }));
 
 app.get("/", (req, res) => {
@@ -20,7 +33,6 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api", routes);
-
 app.use(errorHandler);
 
 export default app;
