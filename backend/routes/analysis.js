@@ -32,8 +32,7 @@ async function getTextFromFile(file) {
 }
 
 async function getAIAnalysis(text) {
-  const apiKey = process.env.GEMINI_API_KEY ? process.env.GEMINI_API_KEY.trim() : "";
-
+  const apiKey = process.env.GEMINI_API_KEY?.trim();
   if (!apiKey) {
     throw new Error("GEMINI_API_KEY is not configured");
   }
@@ -41,33 +40,30 @@ async function getAIAnalysis(text) {
   const modelName = process.env.GEMINI_MODEL || "gemini-2.5-flash";
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
 
-  const prompt = `You are JuriMate — a friendly legal AI assistant.
+  const prompt = `You are JuriMate, a friendly legal AI assistant.
+
 Analyze this legal document and provide:
-1. A clear and descriptive summary in plain English that covers the main points - what the document is, key obligations, important terms, and conditions. Write naturally and be thorough enough to give proper understanding.
-2. A risk score from 0-100 based on these criteria:
-   - 0-20: Very Safe (standard terms, user-friendly, minimal risk)
-   - 21-40: Low Risk (fair terms with minor concerns)
-   - 41-60: Medium Risk (some unfavorable clauses, needs attention)
-   - 61-80: High Risk (multiple red flags, unfavorable terms)
-   - 81-100: Critical Risk (extremely one-sided, dangerous clauses)
-   
-   Calculate the risk score by analyzing:
-   - Liability limitations and indemnification clauses
-   - Termination conditions and penalties
-   - Payment terms and hidden fees
-   - Data privacy and intellectual property rights
-   - Auto-renewal and lock-in periods
-   - Dispute resolution and jurisdiction clauses
-   - One-sided terms favoring the other party
 
-3. Key highlights focusing on RED FLAGS - critical points, potential risks, unfavorable terms, or important clauses that the user MUST be aware of before signing
+1. SUMMARY (200-300 words in plain English):
+Cover the document type, parties involved, main obligations, payment terms, duration, important clauses, rights, restrictions, and key dates. Write naturally and be thorough.
 
-Return ONLY valid JSON in this exact format:
+2. RISK SCORE (just a number 0-100):
+0-20 = Very Safe
+21-40 = Low Risk
+41-60 = Medium Risk
+61-80 = High Risk
+81-100 = Critical Risk
+
+3. KEY HIGHLIGHTS (4-6 important points):
+List critical points the user must know before signing. Format each as:
+Title: Explanation of why this matters
+
+Return in JSON format:
 {
-  "simplifiedText": "A well-explained summary covering the document's purpose, main obligations, key terms, and important conditions. Be descriptive and thorough but focus on what matters most.",
+  "simplifiedText": "your detailed summary here",
   "riskScore": 50,
   "highlights": [
-    {"text": "🚩 Title of red flag or critical clause", "reason": "Why this is important and what risk or concern it poses"}
+    {"text": "Important Point", "reason": "Why it matters"}
   ]
 }
 
@@ -75,53 +71,50 @@ Document:
 ${text}`;
 
   try {
-    const res = await axios.post(url, {
+    const response = await axios.post(url, {
       contents: [{ parts: [{ text: prompt }] }],
       generationConfig: {
         temperature: 0.2,
-        topK: 20,
-        topP: 0.8,
-        maxOutputTokens: 2048,
+        maxOutputTokens: 3000
       }
     });
 
-    if (!res.data.candidates || res.data.candidates.length === 0) {
-      throw new Error("No response from AI model");
-    }
-
-    const aiText = res.data.candidates[0]?.content?.parts?.[0]?.text;
-
+    const aiText = response.data.candidates?.[0]?.content?.parts?.[0]?.text;
     if (!aiText) {
-      throw new Error("Empty response from AI model");
+      throw new Error("No response from AI");
     }
 
-    const clean = aiText.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
-
+   
+    const cleanText = aiText.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+    
     try {
-      const parsed = JSON.parse(clean);
-
-      if (!parsed.simplifiedText || typeof parsed.riskScore !== 'number' || !Array.isArray(parsed.highlights)) {
+      const result = JSON.parse(cleanText);
+      
+     
+      if (!result.simplifiedText || !result.riskScore || !result.highlights) {
         throw new Error("Invalid response structure");
       }
 
-      return parsed;
+      return {
+        simplifiedText: result.simplifiedText,
+        riskScore: result.riskScore,
+        highlights: result.highlights
+      };
+
     } catch (parseError) {
-      console.error("JSON parse error:", parseError.message);
-      console.error("AI response:", clean);
-
-
+     
       return {
         simplifiedText: aiText,
         riskScore: 50,
         highlights: [
-          { text: "General Review", reason: "Please review the document carefully" },
-        ],
+          { text: "Document Review", reason: "Please review this document carefully" }
+        ]
       };
     }
+
   } catch (error) {
-    console.error("Gemini API Error:", error.response?.data || error.message);
-    const errorMessage = error.response?.data?.error?.message || error.message;
-    throw new Error(`AI Analysis failed: ${errorMessage}`);
+    console.error("AI Analysis Error:", error.message);
+    throw new Error(`AI Analysis failed: ${error.message}`);
   }
 }
 

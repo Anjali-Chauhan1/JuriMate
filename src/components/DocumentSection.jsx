@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useApp } from "../context/AppContext";
 
 export default function DocumentSection() {
-  const { setRawText, setDocumentFile, resetAnalysis } = useApp();
+  const { setRawText, setDocumentFile, resetAnalysis, rawText } = useApp();
   const [localText, setLocalText] = useState("");
   const [fileName, setFileName] = useState("");
   const [selectedOption, setSelectedOption] = useState(null);
@@ -179,7 +179,7 @@ export default function DocumentSection() {
           </span>
           <button
             onClick={() => {
-              if (fileName && localText.trim()) {
+              if (fileName) {
                 resetAnalysis();
                 setSelectedOption(null);
                 
@@ -190,10 +190,10 @@ export default function DocumentSection() {
                   }
                 }, 100);
               } else {
-                alert("Please upload a file with valid content.");
+                alert("Please upload a file first.");
               }
             }}
-            disabled={!fileName || !localText.trim()}
+            disabled={!fileName}
             className="px-6 py-2 bg-white text-black rounded-lg hover:bg-gray-200 transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Go to Analysis
