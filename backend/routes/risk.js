@@ -45,8 +45,8 @@ Return in a *clean JSON-like format* like this:
 Keep tone calm, helpful, and reassuring — not alarming.
 `;
 
-    const model = process.env.GEMINI_MODEL || "";
-    const geminiApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`;
+    const modelName = process.env.GEMINI_MODEL || "gemini-2.5-flash";
+    const geminiApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${process.env.GEMINI_API_KEY}`;
 
     const response = await axios.post(geminiApiUrl, {
       contents: [{ parts: [{ text: prompt }] }],
