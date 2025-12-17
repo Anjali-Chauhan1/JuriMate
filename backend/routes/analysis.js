@@ -43,16 +43,31 @@ async function getAIAnalysis(text) {
 
   const prompt = `You are JuriMate — a friendly legal AI assistant.
 Analyze this legal document and provide:
-1. A simplified summary in plain English
-2. A risk score from 0-100 (where 0 is safest, 100 is riskiest)
-3. Key highlights of important clauses or concerns
+1. A clear and descriptive summary in plain English that covers the main points - what the document is, key obligations, important terms, and conditions. Write naturally and be thorough enough to give proper understanding.
+2. A risk score from 0-100 based on these criteria:
+   - 0-20: Very Safe (standard terms, user-friendly, minimal risk)
+   - 21-40: Low Risk (fair terms with minor concerns)
+   - 41-60: Medium Risk (some unfavorable clauses, needs attention)
+   - 61-80: High Risk (multiple red flags, unfavorable terms)
+   - 81-100: Critical Risk (extremely one-sided, dangerous clauses)
+   
+   Calculate the risk score by analyzing:
+   - Liability limitations and indemnification clauses
+   - Termination conditions and penalties
+   - Payment terms and hidden fees
+   - Data privacy and intellectual property rights
+   - Auto-renewal and lock-in periods
+   - Dispute resolution and jurisdiction clauses
+   - One-sided terms favoring the other party
+
+3. Key highlights focusing on RED FLAGS - critical points, potential risks, unfavorable terms, or important clauses that the user MUST be aware of before signing
 
 Return ONLY valid JSON in this exact format:
 {
-  "simplifiedText": "Clear summary of the document",
+  "simplifiedText": "A well-explained summary covering the document's purpose, main obligations, key terms, and important conditions. Be descriptive and thorough but focus on what matters most.",
   "riskScore": 50,
   "highlights": [
-    {"text": "Clause title", "reason": "Why this matters"}
+    {"text": "🚩 Title of red flag or critical clause", "reason": "Why this is important and what risk or concern it poses"}
   ]
 }
 
@@ -63,9 +78,9 @@ ${text}`;
     const res = await axios.post(url, {
       contents: [{ parts: [{ text: prompt }] }],
       generationConfig: {
-        temperature: 0.7,
-        topK: 40,
-        topP: 0.95,
+        temperature: 0.2,
+        topK: 20,
+        topP: 0.8,
         maxOutputTokens: 2048,
       }
     });
