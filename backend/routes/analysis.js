@@ -71,11 +71,17 @@ Document:
 ${text}`;
 
   try {
+    console.log('Calling Gemini API with model:', modelName);
     const response = await axios.post(url, {
       contents: [{ parts: [{ text: prompt }] }],
       generationConfig: {
         temperature: 0.2,
         maxOutputTokens: 3000
+      }
+    }, {
+      timeout: 30000,
+      headers: {
+        'Content-Type': 'application/json'
       }
     });
 
@@ -114,6 +120,32 @@ ${text}`;
 
   } catch (error) {
     console.error("AI Analysis Error:", error.message);
+    
+    // Log detailed error information
+    if (error.response) {
+      console.error('API Response Status:', error.response.status);
+      console.error('API Response Data:', JSON.stringify(error.response.data, null, 2));
+      console.error('API Response Headers:', error.response.headers);
+      
+      // Provide specific error messages based on status code
+      if (error.response.status === 503) {
+        throw new Error('AI service is temporarily unavailable. The model may be overloaded. Please try again in a moment.');
+      } else if (error.response.status === 404) {
+        throw new Error(`Model "${modelName}" not found. Please verify the model name is correct.`);
+      } else if (error.response.status === 400) {
+        const errorMsg = error.response.data?.error?.message || 'Invalid request';
+        throw new Error(`Invalid API request: ${errorMsg}`);
+      } else if (error.response.status === 429) {
+        throw new Error('Rate limit exceeded. Please wait a moment and try again.');
+      }
+      
+      throw new Error(`API Error (${error.response.status}): ${error.response.data?.error?.message || error.message}`);
+    } else if (error.code === 'ECONNABORTED') {
+      throw new Error('Request timeout - the AI service took too long to respond. Please try again.');
+    } else if (error.code === 'ENOTFOUND' || error.code === 'ECONNREFUSED') {
+      throw new Error('Unable to connect to AI service. Please check your internet connection.');
+    }
+    
     throw new Error(`AI Analysis failed: ${error.message}`);
   }
 }
